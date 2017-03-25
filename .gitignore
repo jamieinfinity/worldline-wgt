@@ -1,0 +1,10 @@
+.DS_Store
+.ipynb_checkpoints
+*.ini
+*.cfg
+_Data
+.env
+.idea
+_libs
+node_modules
+*_apptoken
