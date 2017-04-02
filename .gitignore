@@ -3,6 +3,7 @@
 *.ini
 *.cfg
 _Data
+*.db
 .env
 .idea
 _libs
