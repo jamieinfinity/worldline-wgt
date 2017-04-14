@@ -4,6 +4,8 @@
 *.cfg
 _Data
 *.db
+*.pyc
+__pycache__*
 .env
 .idea
 _libs

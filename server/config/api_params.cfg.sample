@@ -1,0 +1,13 @@
+[fitbit]
+consumer_key = xxx
+consumer_secret = xxx
+refresh_token = xxx
+access_token = xxx
+expires_at = xxx
+
+[withings]
+consumer_key = xxx
+consumer_secret = xxx
+access_token = xxx
+access_token_secret = xxx
+user_id = xxx
