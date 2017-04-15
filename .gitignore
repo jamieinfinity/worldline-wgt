@@ -3,6 +3,7 @@
 *.ini
 *.cfg
 _Data
+*.csv
 *.db
 *.pyc
 __pycache__*
