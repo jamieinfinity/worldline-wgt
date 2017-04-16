@@ -1,6 +1,10 @@
 import shutil
 import datetime
 import pandas as pd
+import ConfigParser
+import fitbit
+import myfitnesspal
+from withings import WithingsApi, WithingsCredentials
 
 
 def copy_file(src, dest):
@@ -41,3 +45,98 @@ def insert_values(date_values, column, df):
     for dv in date_values:
         df_updated.set_value(dv[0], column, dv[1])
     return df_updated
+
+
+def persist_fitbit_refresh_token(token_dict, cfg_file):
+    parser = ConfigParser.SafeConfigParser()
+    parser.read(cfg_file)
+    parser.set('fitbit', 'access_token', token_dict['access_token'])
+    parser.set('fitbit', 'refresh_token', token_dict['refresh_token'])
+    parser.set('fitbit', 'expires_at', "{:.6f}".format(token_dict['expires_at']))
+    with open(cfg_file, 'wb') as configfile:
+        parser.write(configfile)
+
+
+def refresh_steps(cfg_file, db_connection, db_df):
+    print "REFRESHING STEPS..."
+    parser = ConfigParser.SafeConfigParser()
+    parser.read(cfg_file)
+    consumer_key = parser.get('fitbit', 'consumer_key')
+    consumer_secret = parser.get('fitbit', 'consumer_secret')
+    access_token = parser.get('fitbit', 'access_token')
+    refresh_token = parser.get('fitbit', 'refresh_token')
+    expires_at = parser.get('fitbit', 'expires_at')
+
+    auth_client = fitbit.Fitbit(consumer_key, consumer_secret,
+                                access_token=access_token,
+                                refresh_token=refresh_token,
+                                expires_at=float(expires_at),
+                                refresh_cb=(lambda x: persist_fitbit_refresh_token(x, cfg_file))
+                                )
+
+    [date_start, date_end] = get_target_date_endpoints('Steps', db_df)
+    steps = auth_client.time_series('activities/steps', base_date=date_start, end_date=date_end)
+    date_values = [[pd.tseries.tools.to_datetime(val['dateTime']), val['value']] for val in steps['activities-steps']]
+    updated_df = insert_values(date_values, 'Steps', db_df)
+
+    pd.io.sql.to_sql(updated_df, 'fitness', db_connection, if_exists='replace')
+
+    return updated_df
+
+
+def refresh_calories(db_connection, db_df):
+    print "REFRESHING CALORIES..."
+    [date_start, date_end] = get_target_date_endpoints('Calories', db_df)
+    date_query = date_start
+    date_diff = date_end - date_query
+    days = date_diff.days + 1
+
+    client = myfitnesspal.Client('jamieinfinity')
+
+    diary_dump = []
+    for i in range(days):
+        diary_data = client.get_date(date_query)
+        diary_dump.append(diary_data)
+        date_query = date_query + datetime.timedelta(days=1)
+
+    date_values = [[pd.tseries.tools.to_datetime(x.date.strftime('%Y-%m-%d')), x.totals['calories']] for x in diary_dump]
+
+    updated_df = insert_values(date_values, 'Calories', db_df)
+
+    pd.io.sql.to_sql(updated_df, 'fitness', db_connection, if_exists='replace')
+
+    return updated_df
+
+
+def refresh_weight(cfg_file, db_connection, db_df):
+    print "REFRESHING WEIGHT..."
+    parser = ConfigParser.SafeConfigParser()
+    parser.read(cfg_file)
+    consumer_key = parser.get('withings', 'consumer_key')
+    consumer_secret = parser.get('withings', 'consumer_secret')
+    access_token = parser.get('withings', 'access_token')
+    access_token_secret = parser.get('withings', 'access_token_secret')
+    user_id = parser.get('withings', 'user_id')
+
+    credentials = WithingsCredentials(access_token=access_token,
+                                      access_token_secret=access_token_secret,
+                                      consumer_key=consumer_key,
+                                      consumer_secret=consumer_secret,
+                                      user_id=user_id)
+    client = WithingsApi(credentials)
+
+    [date_start, date_end] = get_target_date_endpoints('Weight', db_df)
+    date_query = date_start
+    date_diff = date_end - date_query
+    days = date_diff.days + 2
+
+    measures = client.get_measures(meastype=1, limit=days)
+    measures.pop(0)
+    weight_json = [{'weight': (float("{:.1f}".format(x.weight * 2.20462))), 'date': x.date.strftime('%Y-%m-%d')} for x
+                   in measures]
+    date_values = [[pd.tseries.tools.to_datetime(x['date']), x['weight']] for x in weight_json]
+    updated_df = insert_values(date_values, 'Weight', db_df)
+
+    pd.io.sql.to_sql(updated_df, 'fitness', db_connection, if_exists='replace')
+
+    return updated_df
