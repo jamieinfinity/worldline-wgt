@@ -78,6 +78,7 @@ def refresh_steps(cfg_file, db_connection, db_df):
     steps = auth_client.time_series('activities/steps', base_date=date_start, end_date=date_end)
     date_values = [[pd.tseries.tools.to_datetime(val['dateTime']), val['value']] for val in steps['activities-steps']]
     updated_df = insert_values(date_values, 'Steps', db_df)
+    updated_df[['Steps']] = updated_df[['Steps']].apply(pd.to_numeric)
 
     pd.io.sql.to_sql(updated_df, 'fitness', db_connection, if_exists='replace')
 
@@ -140,3 +141,20 @@ def refresh_weight(cfg_file, db_connection, db_df):
     pd.io.sql.to_sql(updated_df, 'fitness', db_connection, if_exists='replace')
 
     return updated_df
+
+
+def impute_missing_weights(db_connection, db_df):
+    print "IMPUTING MISSING WEIGHTS..."
+    db_df_copy = db_df.copy()
+    interp_range = 8
+    temp = db_df_copy[db_df_copy['Weight'].isnull()].copy()
+    temp['Weight'] = 1
+    temp = temp.drop(['Steps', 'Calories'], axis=1).rename(
+        columns={"Weight": "WeightImputed"})
+    db_df_copy = db_df_copy.join(temp)
+    db_df_copy['WeightImputed'] = [1 if val == 1 else 0 for val in db_df_copy['WeightImputed']]
+    db_df_copy = db_df_copy.interpolate(limit=interp_range, method='spline', order=5)
+
+    pd.io.sql.to_sql(db_df_copy, 'fitness', db_connection, if_exists='replace')
+
+    return db_df_copy

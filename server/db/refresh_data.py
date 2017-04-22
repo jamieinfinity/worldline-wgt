@@ -1,3 +1,7 @@
+#!/Users/jamieinfinity/anaconda/envs/py27/bin/python
+# import sys
+# toolpath = '/Users/jamieinfinity/Projects/WorldLine/worldline-wgt/server/src'
+# sys.path.append(toolpath)
 import wlp_utils.etl_utils as etl
 import os
 import datetime
@@ -24,4 +28,6 @@ if os.path.isfile(db_file_name):
 updated_df = etl.refresh_steps(cfg_file, db_connection, db_df)
 updated_df = etl.refresh_weight(cfg_file, db_connection, updated_df)
 updated_df = etl.refresh_calories(db_connection, updated_df)
+updated_df = etl.impute_missing_weights(db_connection, updated_df)
+
 
