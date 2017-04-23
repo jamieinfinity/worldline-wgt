@@ -29,5 +29,5 @@ updated_df = etl.refresh_steps(cfg_file, db_connection, db_df)
 updated_df = etl.refresh_weight(cfg_file, db_connection, updated_df)
 updated_df = etl.refresh_calories(db_connection, updated_df)
 updated_df = etl.impute_missing_weights(db_connection, updated_df)
-
+updated_df = etl.add_smoothed_cols(db_connection, updated_df)
 

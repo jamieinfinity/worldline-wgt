@@ -1,5 +1,6 @@
 import shutil
 import datetime
+import numpy as np
 import pandas as pd
 import ConfigParser
 import fitbit
@@ -153,8 +154,103 @@ def impute_missing_weights(db_connection, db_df):
         columns={"Weight": "WeightImputed"})
     db_df_copy = db_df_copy.join(temp)
     db_df_copy['WeightImputed'] = [1 if val == 1 else 0 for val in db_df_copy['WeightImputed']]
-    db_df_copy = db_df_copy.interpolate(limit=interp_range, method='spline', order=5)
+    db_df_copy2 = db_df_copy.copy()
+    db_df_copy2 = db_df_copy2.interpolate(limit=interp_range, method='spline', order=5)
+    db_df_copy.Weight = db_df_copy2.Weight.values
 
     pd.io.sql.to_sql(db_df_copy, 'fitness', db_connection, if_exists='replace')
 
     return db_df_copy
+
+
+def kernel_function(x, radius):
+    return np.exp(-(x**2)/(2*radius**2))/(np.sqrt(2*np.pi)*radius)
+
+
+def date_diff_days(d1, d2):
+    return (d2-d1).astype('timedelta64[D]').astype(int)
+
+
+def zeroify(x):
+    return x if not np.isnan(x) else 0
+
+
+def select_null(x_orig, x_new):
+    return x_new if not np.isnan(x_orig) else x_orig
+
+
+def smooth0(index, x, val, radius):
+    numerator = [zeroify(val[i])*kernel_function(x[index] - x[i], radius) for i in range(0,len(x))]
+    denominator = [kernel_function(x[index] - x[i], radius) for i in range(0,len(x))]
+    return np.sum(numerator) / np.sum(denominator)
+
+
+def data_smoother(data, radius, diff_op):
+    x1 = data[0][0]
+    x = [diff_op(x1, di[0]) for di in data]
+    val = [di[1] for di in data]
+    smooth_vals = [smooth0(i, x, val, radius) for i in range(0,len(data))]
+    smooth_vals = [select_null(val[i], smooth_vals[i]) for i in range(0, len(data))]
+    return [[data[i][0], smooth_vals[i]] for i in range(0, len(data))]
+
+
+def add_smoothed_col(db_df, col, radius):
+    new_col_name = col + 'Smoothed' + str(radius) + 'Days'
+    xi = db_df.index.values
+    vals = db_df[col].values
+    xv = [[xi[i], vals[i]] for i in range(0, len(vals))]
+    xv_smoothed = data_smoother(xv, radius, date_diff_days)
+    db_df[new_col_name] = [xv[1] for xv in xv_smoothed]
+
+
+def add_smoothed_cols(db_connection, db_df):
+    db_df_copy = db_df.copy()
+    print "ADDING SMOOTHED STEPS..."
+    add_smoothed_col(db_df_copy, 'Steps', 3)
+    add_smoothed_col(db_df_copy, 'Steps', 5)
+    add_smoothed_col(db_df_copy, 'Steps', 7)
+    print "ADDING SMOOTHED WEIGHT..."
+    add_smoothed_col(db_df_copy, 'Weight', 3)
+    add_smoothed_col(db_df_copy, 'Weight', 5)
+    add_smoothed_col(db_df_copy, 'Weight', 7)
+    print "ADDING SMOOTHED CALORIES..."
+    add_smoothed_col(db_df_copy, 'Calories', 3)
+    add_smoothed_col(db_df_copy, 'Calories', 5)
+    add_smoothed_col(db_df_copy, 'Calories', 7)
+
+    pd.io.sql.to_sql(db_df_copy, 'fitness', db_connection, if_exists='replace')
+
+    return db_df_copy
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
