@@ -5,7 +5,7 @@ ORDER BY Date;
 
 select *
 from fitness
-where date > date('2017-04-14');
+where date > date('2017-01-01');
 
 select *
 from fitness
