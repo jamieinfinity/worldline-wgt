@@ -77,7 +77,7 @@ def refresh_steps(cfg_file, db_connection, db_df):
 
     [date_start, date_end] = get_target_date_endpoints('Steps', db_df)
     steps = auth_client.time_series('activities/steps', base_date=date_start, end_date=date_end)
-    date_values = [[pd.tseries.tools.to_datetime(val['dateTime']), val['value']] for val in steps['activities-steps']]
+    date_values = [[pd.tseries.offsets.to_datetime(val['dateTime']), val['value']] for val in steps['activities-steps']]
     updated_df = insert_values(date_values, 'Steps', db_df)
     updated_df[['Steps']] = updated_df[['Steps']].apply(pd.to_numeric)
 
@@ -101,7 +101,7 @@ def refresh_calories(db_connection, db_df):
         diary_dump.append(diary_data)
         date_query = date_query + datetime.timedelta(days=1)
 
-    date_values = [[pd.tseries.tools.to_datetime(x.date.strftime('%Y-%m-%d')), x.totals['calories']] for x in
+    date_values = [[pd.tseries.offsets.to_datetime(x.date.strftime('%Y-%m-%d')), x.totals['calories']] for x in
                    diary_dump]
 
     updated_df = insert_values(date_values, 'Calories', db_df)
@@ -137,7 +137,7 @@ def refresh_weight(cfg_file, db_connection, db_df):
     measures.pop(0)
     weight_json = [{'weight': (float("{:.1f}".format(x.weight * 2.20462))), 'date': x.date.strftime('%Y-%m-%d')} for x
                    in measures]
-    date_values = [[pd.tseries.tools.to_datetime(x['date']), x['weight']] for x in weight_json]
+    date_values = [[pd.tseries.offsets.to_datetime(x['date']), x['weight']] for x in weight_json]
     updated_df = insert_values(date_values, 'Weight', db_df)
 
     pd.io.sql.to_sql(updated_df, 'fitness', db_connection, if_exists='replace')
@@ -206,6 +206,7 @@ def add_smoothed_col(db_df, col, radius):
     vals = db_df[col].values
     xv = [[xi[i], vals[i]] for i in range(0, len(vals))]
     xv_smoothed = data_smoother(xv, radius, date_diff_days)
+    xv_smoothed = data_smoother(xv_smoothed, radius, date_diff_days)
     db_df[new_col_name] = [xv[1] for xv in xv_smoothed]
 
 
