@@ -1,0 +1,53 @@
+{
+  "name": "worldline-wgt",
+  "version": "0.0.1",
+  "description": "Worldline Project component focussed on monitoring and forecasting my weight.",
+  "author": "Jamie Williams",
+  "license": "BSD-3-Clause",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jamieinfinity/worldline-wgt.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jamieinfinity/worldline-wgt/issues"
+  },
+  "homepage": "https://github.com/jamieinfinity/worldline-wgt",
+  "keywords": [
+    "WorldLine Project",
+    "quantified self",
+    "deep learning"
+  ],
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "pretest": "script/pretest",
+    "test": "script/test",
+    "prepublish": "script/prepublish",
+    "start": "script/start",
+    "dev": "NODE_ENV=dev && script/prepublish --watch",
+    "reload": "livereload 'example/build/'",
+    "watch": "npm-run-all --parallel reload dev"
+  },
+  "dependencies": {
+    "d3-request": "^1.0.5",
+    "d3-selection": "^1.1.0",
+    "wlp-calendar": "0.1.0",
+    "wlp-timeline": "0.1.2"
+  },
+  "devDependencies": {
+    "babel-eslint": "^7.2.3",
+    "eslint": "^3.12.2",
+    "http-server": "^0.9.0",
+    "json2module": "0.0",
+    "livereload": "^0.6.0",
+    "npm-run-all": "^4.0.0",
+    "rollup": "0.36",
+    "rollup-plugin-ascii": "0.0.3",
+    "rollup-plugin-commonjs": "^8.0.2",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-replace": "^1.1.1",
+    "tape": "^4.6.3"
+  }
+}

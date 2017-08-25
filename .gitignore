@@ -1,14 +1,39 @@
-.DS_Store
-.ipynb_checkpoints
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.csv
 *.ini
 *.cfg
 _Data
-*.csv
 *.db
+*.env
+_libs
+*_apptoken
+
+# Coverage tools
+lib-cov
+coverage
+coverage.html
+.cover*
+.coveralls.yml
+
+# Dependency directory
+node_modules
+
+# Editor and other tmp files
+*.swp
+*.un~
+*.iml
+*.ipr
+*.iws
+*.sublime-*
+.idea/
+*.DS_Store
+.ipynb_checkpoints
 *.pyc
 __pycache__*
-.env
-.idea
-_libs
-node_modules
-*_apptoken

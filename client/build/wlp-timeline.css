@@ -1,0 +1,160 @@
+
+#timelineContainer {
+    display: flex;
+    justify-content: center;
+}
+
+#timelineRootDiv {
+    font-family: "Avenir";
+    font-size: 10px;
+}
+
+#timelineOuter {
+    overflow: visible;
+    /*background-color: lightblue;*/
+}
+
+#innertimelinebackground {
+    fill: white;
+    fill-opacity: 0;
+}
+
+#outertimelinebackground {
+    fill: white;
+    fill-opacity: 0;
+    stroke: #ddd;
+    stroke-width: 3;
+}
+
+#timelineInner circle.selected {
+    fill: #A1C9DD;
+}
+
+#timelineInner circle {
+    /*fill: #ececec;*/
+    fill: #dfdfdf;
+    r: 2;
+}
+
+#timelineInner path.selected {
+    stroke: #2F6683;
+}
+
+#timelineInner path {
+    fill: none;
+    stroke: #999;
+    /*stroke: #6a6a6a;*/
+    stroke-width: 2px;
+}
+
+.feedLabel:hover {
+    fill: #333;
+}
+
+.feedLabel {
+    cursor: default;
+    font-family: "Monaco";
+    font-size: 12px;
+    fill: #aaa;
+    text-transform: uppercase;
+}
+
+.feedLabel.selected {
+    fill: #333;
+}
+
+.axis-y path,
+.axis-y line {
+    /*fill: none;*/
+    stroke-width: 1;
+    stroke: #ddd;
+}
+.axis-y text {
+    fill: #ccc;
+    font-size: 9px;
+}
+
+.axis-x path,
+.axis-x line {
+    fill: none;
+    stroke-width: 1;
+    stroke: #f2f2f2;
+}
+
+.axis-x.main-axis text {
+    fill: #aaa;
+}
+
+.axis-x.day-names-axis text {
+    fill: #ddd;
+}
+
+.axis-x.days-axis path,
+.axis-x.days-axis line {
+    stroke-width: 1;
+    stroke: #f2f2f2;
+}
+
+.axis-x.weeks-axis path,
+.axis-x.weeks-axis line {
+    stroke-width: 1;
+    stroke: #ddd;
+}
+
+svg.icon {
+    opacity: 0.55;
+}
+
+svg.zoomButton {
+    opacity: 0.45;
+}
+
+svg.zoomButton:hover {
+    opacity: .8;
+}
+
+td.tabcol1 {
+    padding-left: 5px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    color: #fff;
+}
+table.tooltiptable {
+    margin: -5px;
+}
+
+.d3-tip {
+    line-height: .8;
+    padding: 8px;
+    font-family: Avenir;
+    font-size: 12px;
+    background: rgba(40, 40, 40, 0.65);
+    color: #bbb;
+    border-radius: 3px;
+    z-index: 1000;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+    box-sizing: border-box;
+    display: inline;
+    font-size: 10px;
+    width: 100%;
+    line-height: 1;
+    color: rgba(40, 40, 40, 0.7);
+    content: "\25BC";
+    position: absolute;
+    text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+    margin: -1px 0 0 0;
+    top: 100%;
+    left: 0;
+}
+.d3-tip.s:after {
+    opacity: 0;
+    top: 100%;
+    right: 0;
+}

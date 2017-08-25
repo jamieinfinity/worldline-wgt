@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Run test first
+./script/test
+
+build_dir="build"
+app_dir="app"
+entry_point="index.js"
+target_point="worldline-wgt"
+
+# Delete app/build dir
+rm -rf $app_dir/$build_dir
+
+# Create a build folder
+mkdir $app_dir/$build_dir/
+
+cp src/css/worldline-wgt.css $build_dir/worldline-wgt.css
+cp -H node_modules/wlp-calendar/build/wlp-calendar.css $build_dir/wlp-calendar.css
+cp -H node_modules/wlp-timeline/build/wlp-timeline.css $build_dir/wlp-timeline.css
+cp -H node_modules/wlp-timeline/build/*.svg $build_dir/
+rollup -c -f umd -n worldline_wgt -o $build_dir/$target_point.js -- $entry_point
+
+# Remember live reload happens only with app build, once done prepublish has to be run again
+cp src/css/worldline-wgt.css $app_dir/$build_dir/worldline-wgt.css
+cp -H node_modules/wlp-calendar/build/wlp-calendar.css $app_dir/$build_dir/wlp-calendar.css
+cp -H node_modules/wlp-timeline/build/wlp-timeline.css $app_dir/$build_dir/wlp-timeline.css
+cp -H node_modules/wlp-timeline/build/*.svg $app_dir/$build_dir/
+rollup -c $1 -f umd -n worldline_wgt -o $app_dir/$build_dir/$target_point.js -- $entry_point
+
+# uglify seems to not work so well with es6 code
+# uglifyjs $build_dir/$target_point.js -c negate_iife=false -m -o $build_dir/$target_point.min.js

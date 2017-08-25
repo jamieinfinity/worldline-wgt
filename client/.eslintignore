@@ -1,0 +1,5 @@
+app/build/*
+lib/*
+node_modules/*
+build/*
+coverage/*

@@ -1,0 +1,154 @@
+#calendarContainer {
+    display: flex;
+    justify-content: center;
+    /*background-color: lightblue;*/
+}
+
+#calendarRootDiv {
+    display: flex;
+    font-family: "Avenir";
+    font-size: 10px;
+    /*background-color: lightgreen;*/
+}
+
+#calendarInnerSVG {
+    overflow: visible;
+    /*background-color: lightblue;*/
+}
+
+#innerCalendarBackground {
+    fill: #aaa;
+    stroke: #eee;
+    stroke-width: 3;
+}
+
+#outerCalendarBackground {
+    fill: white;
+    fill-opacity: 0;
+    /*fill: #aaa;*/
+    stroke: #eee;
+    stroke-width: 3;
+}
+
+#calendarDays rect.day {
+    stroke: #eee;
+    stroke-width: 1;
+}
+
+#calendarDays path {
+    stroke: #eee;
+    stroke-width: 3;
+}
+
+#calendarWeeks rect.week {
+    stroke: #eee;
+    stroke-width: 3;
+}
+
+#calendarMonths rect.month {
+    stroke: #eee;
+    stroke-width: 3;
+}
+
+#calendarYears rect.year {
+    stroke: #eee;
+    stroke-width: 3;
+}
+
+.gridRowLabel {
+    cursor: default;
+    font-family: "Monaco";
+    font-size: 11px;
+    fill: #aaa;
+}
+
+.monthLabel {
+    cursor: default;
+    font-family: "Monaco";
+    font-size: 7px;
+    fill: white;
+    opacity: 1;
+}
+
+.yearLabel {
+    cursor: default;
+    font-family: "Monaco";
+    font-size: 7px;
+    fill: white;
+    opacity: 1;
+}
+
+#calendarYears rect.year.selected {
+    stroke:#ffd877;
+}
+#calendarYears text.yearLabel.selected {
+    fill: #222;
+}
+#calendarMonths rect.month.selected {
+    stroke:#ffd877;
+}
+#calendarWeeks rect.week.selected {
+    stroke:#ffd877;
+}
+#calendarDays rect.day.selected {
+    stroke-width: 2;
+    stroke:#ffd877;
+}
+
+.axis-y path,
+.axis-y line {
+    /*fill: none;*/
+    stroke-width: 1;
+    stroke: #ccc;
+}
+.axis-y text {
+    fill: #aaa;
+    font-size: 9px;
+}
+
+
+td.tabcol1 {
+    padding-left: 5px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    color: #fff;
+}
+table.tooltiptable {
+    margin: -5px;
+}
+
+.d3-tip {
+    line-height: .8;
+    padding: 8px;
+    font-family: Avenir;
+    font-size: 12px;
+    background: rgba(40, 40, 40, 0.65);
+    color: #bbb;
+    border-radius: 3px;
+    z-index: 1000;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+    box-sizing: border-box;
+    display: inline;
+    font-size: 10px;
+    width: 100%;
+    line-height: 1;
+    color: rgba(40, 40, 40, 0.7);
+    content: "\25BC";
+    position: absolute;
+    text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+    margin: -1px 0 0 0;
+    top: 100%;
+    left: 0;
+}
+.d3-tip.s:after {
+    opacity: 0;
+    top: 100%;
+    right: 0;
+}
