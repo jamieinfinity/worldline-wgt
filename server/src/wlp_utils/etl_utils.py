@@ -181,13 +181,17 @@ def zeroify(x):
     return x if not np.isnan(x) else 0
 
 
+def ignore_null(x):
+    return 1 if not np.isnan(x) else 0
+
+
 def select_null(x_orig, x_new):
     return x_new if not np.isnan(x_orig) else x_orig
 
 
 def smooth0(index, x, val, radius):
     numerator = [zeroify(val[i]) * kernel_function(x[index] - x[i], radius) for i in range(0, len(x))]
-    denominator = [kernel_function(x[index] - x[i], radius) for i in range(0, len(x))]
+    denominator = [ignore_null(val[i])*kernel_function(x[index] - x[i], radius) for i in range(0, len(x))]
     return np.sum(numerator) / np.sum(denominator)
 
 
