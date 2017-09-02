@@ -29,11 +29,11 @@ function buildApp(domElementID) {
                 tempdate.setHours(tempdate.getHours() + 12 + tempdate.getTimezoneOffset()/60.0);
             let tempdate2 = new Date(tempdate.toString());
             weightData.push({'timestamp': tempdate2, 'measurementValue': Number(d['Weight'])});
-            weightTrendData.push({'timestamp': tempdate2, 'measurementValue': Number(d['WeightSmoothed3Days'])});
+            weightTrendData.push({'timestamp': tempdate2, 'measurementValue': Number(d['WeightSmoothed5Days'])});
             caloriesData.push({'timestamp': tempdate2, 'measurementValue': Number(d['Calories'])});
-            caloriesTrendData.push({'timestamp': tempdate2, 'measurementValue': Number(d['CaloriesSmoothed3Days'])});
+            caloriesTrendData.push({'timestamp': tempdate2, 'measurementValue': Number(d['CaloriesSmoothed5Days'])});
             stepsData.push({'timestamp': tempdate2, 'measurementValue': Number(d['Steps'])});
-            stepsTrendData.push({'timestamp': tempdate2, 'measurementValue': Number(d['StepsSmoothed3Days'])});
+            stepsTrendData.push({'timestamp': tempdate2, 'measurementValue': Number(d['StepsSmoothed5Days'])});
         });
 
         addFeed({
