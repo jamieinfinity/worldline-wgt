@@ -1,4 +1,4 @@
-#!/Users/jamieinfinity/anaconda/envs/py27/bin/python
+#!/Users/jamieinfinity/anaconda/bin/python3
 import sys
 toolpath = '/Users/jamieinfinity/Projects/WorldLine/worldline-wgt/server/src'
 sys.path.append(toolpath)

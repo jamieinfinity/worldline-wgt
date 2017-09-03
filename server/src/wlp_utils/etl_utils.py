@@ -2,7 +2,7 @@ import shutil
 import datetime
 import numpy as np
 import pandas as pd
-import ConfigParser
+import configparser
 import fitbit
 import myfitnesspal
 from withings import WithingsApi, WithingsCredentials
@@ -49,7 +49,7 @@ def insert_values(date_values, column, df):
 
 
 def persist_fitbit_refresh_token(token_dict, cfg_file):
-    parser = ConfigParser.SafeConfigParser()
+    parser = configparser.ConfigParser()
     parser.read(cfg_file)
     parser.set('fitbit', 'access_token', token_dict['access_token'])
     parser.set('fitbit', 'refresh_token', token_dict['refresh_token'])
@@ -59,8 +59,8 @@ def persist_fitbit_refresh_token(token_dict, cfg_file):
 
 
 def refresh_steps(cfg_file, db_connection, db_df):
-    print "REFRESHING STEPS..."
-    parser = ConfigParser.SafeConfigParser()
+    print("REFRESHING STEPS...")
+    parser = configparser.ConfigParser()
     parser.read(cfg_file)
     consumer_key = parser.get('fitbit', 'consumer_key')
     consumer_secret = parser.get('fitbit', 'consumer_secret')
@@ -87,7 +87,7 @@ def refresh_steps(cfg_file, db_connection, db_df):
 
 
 def refresh_calories(db_connection, db_df):
-    print "REFRESHING CALORIES..."
+    print("REFRESHING CALORIES...")
     [date_start, date_end] = get_target_date_endpoints('Calories', db_df)
     date_query = date_start
     date_diff = date_end - date_query
@@ -112,8 +112,8 @@ def refresh_calories(db_connection, db_df):
 
 
 def refresh_weight(cfg_file, db_connection, db_df):
-    print "REFRESHING WEIGHT..."
-    parser = ConfigParser.SafeConfigParser()
+    print("REFRESHING WEIGHT...")
+    parser = configparser.ConfigParser()
     parser.read(cfg_file)
     consumer_key = parser.get('withings', 'consumer_key')
     consumer_secret = parser.get('withings', 'consumer_secret')
@@ -146,7 +146,7 @@ def refresh_weight(cfg_file, db_connection, db_df):
 
 
 def impute_missing_weights(db_connection, db_df):
-    print "IMPUTING MISSING WEIGHTS..."
+    print("IMPUTING MISSING WEIGHTS...")
 
     generated_columns = [col for col in db_df.columns.values if
                          col not in ['Weight', 'Steps', 'Calories', 'WeightImputed']]
@@ -216,15 +216,15 @@ def add_smoothed_col(db_df, col, radius):
 
 def add_smoothed_cols(db_connection, db_df):
     db_df_copy = db_df.copy()
-    print "ADDING SMOOTHED STEPS..."
+    print("ADDING SMOOTHED STEPS...")
     add_smoothed_col(db_df_copy, 'Steps', 3)
     add_smoothed_col(db_df_copy, 'Steps', 5)
     add_smoothed_col(db_df_copy, 'Steps', 7)
-    print "ADDING SMOOTHED WEIGHT..."
+    print("ADDING SMOOTHED WEIGHT...")
     add_smoothed_col(db_df_copy, 'Weight', 3)
     add_smoothed_col(db_df_copy, 'Weight', 5)
     add_smoothed_col(db_df_copy, 'Weight', 7)
-    print "ADDING SMOOTHED CALORIES..."
+    print("ADDING SMOOTHED CALORIES...")
     add_smoothed_col(db_df_copy, 'Calories', 3)
     add_smoothed_col(db_df_copy, 'Calories', 5)
     add_smoothed_col(db_df_copy, 'Calories', 7)
