@@ -2,7 +2,7 @@ import os
 import wlp_utils.etl_utils as etl
 import pandas as pd
 import datetime
-import sqlite3
+from sqlalchemy import create_engine
 
 
 server_dir = '/Users/jamieinfinity/Projects/WorldLine/worldline-wgt/server/'
@@ -24,8 +24,7 @@ seed_df = pd.read_csv(seed_file_name, parse_dates=['Date'], index_col='Date')
 seed_df.drop(['CaloriesOut', 'CaloriesBMR', 'CaloriesActivity'], axis=1, inplace=True)
 seed_df[['Steps']] = seed_df[['Steps']].apply(pd.to_numeric)
 
-conn = sqlite3.connect(db_file_name)
-pd.io.sql.to_sql(seed_df, 'fitness', conn, if_exists='replace')
-
-
+engine = create_engine('sqlite:///'+db_file_name)
+with engine.connect() as conn, conn.begin():
+    seed_df.to_sql('fitness', conn, if_exists='replace')
 

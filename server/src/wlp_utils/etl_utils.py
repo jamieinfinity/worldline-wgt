@@ -58,7 +58,7 @@ def persist_fitbit_refresh_token(token_dict, cfg_file):
         parser.write(configfile)
 
 
-def refresh_steps(cfg_file, db_connection, db_df):
+def refresh_steps(cfg_file, engine, db_df):
     print("REFRESHING STEPS...")
     parser = configparser.ConfigParser()
     parser.read(cfg_file)
@@ -81,12 +81,13 @@ def refresh_steps(cfg_file, db_connection, db_df):
     updated_df = insert_values(date_values, 'Steps', db_df)
     updated_df[['Steps']] = updated_df[['Steps']].apply(pd.to_numeric)
 
-    pd.io.sql.to_sql(updated_df, 'fitness', db_connection, if_exists='replace')
+    with engine.connect() as conn, conn.begin():
+        updated_df.to_sql('fitness', conn, if_exists='replace')
 
     return updated_df
 
 
-def refresh_calories(db_connection, db_df):
+def refresh_calories(engine, db_df):
     print("REFRESHING CALORIES...")
     [date_start, date_end] = get_target_date_endpoints('Calories', db_df)
     date_query = date_start
@@ -106,12 +107,13 @@ def refresh_calories(db_connection, db_df):
 
     updated_df = insert_values(date_values, 'Calories', db_df)
 
-    pd.io.sql.to_sql(updated_df, 'fitness', db_connection, if_exists='replace')
+    with engine.connect() as conn, conn.begin():
+        updated_df.to_sql('fitness', conn, if_exists='replace')
 
     return updated_df
 
 
-def refresh_weight(cfg_file, db_connection, db_df):
+def refresh_weight(cfg_file, engine, db_df):
     print("REFRESHING WEIGHT...")
     parser = configparser.ConfigParser()
     parser.read(cfg_file)
@@ -140,12 +142,13 @@ def refresh_weight(cfg_file, db_connection, db_df):
     date_values = [[pd.tseries.offsets.to_datetime(x['date']), x['weight']] for x in weight_json]
     updated_df = insert_values(date_values, 'Weight', db_df)
 
-    pd.io.sql.to_sql(updated_df, 'fitness', db_connection, if_exists='replace')
+    with engine.connect() as conn, conn.begin():
+        updated_df.to_sql('fitness', conn, if_exists='replace')
 
     return updated_df
 
 
-def impute_missing_weights(db_connection, db_df):
+def impute_missing_weights(engine, db_df):
     print("IMPUTING MISSING WEIGHTS...")
 
     generated_columns = [col for col in db_df.columns.values if
@@ -164,7 +167,8 @@ def impute_missing_weights(db_connection, db_df):
     db_df_copy2 = db_df_copy2.interpolate(limit=interp_range, method='spline', order=5)
     db_df_copy.Weight = db_df_copy2.Weight.values
 
-    pd.io.sql.to_sql(db_df_copy, 'fitness', db_connection, if_exists='replace')
+    with engine.connect() as conn, conn.begin():
+        db_df_copy.to_sql('fitness', conn, if_exists='replace')
 
     return db_df_copy
 
@@ -214,7 +218,7 @@ def add_smoothed_col(db_df, col, radius):
     db_df[new_col_name] = [xv[1] for xv in xv_smoothed]
 
 
-def add_smoothed_cols(db_connection, db_df):
+def add_smoothed_cols(engine, db_df):
     db_df_copy = db_df.copy()
     print("ADDING SMOOTHED STEPS...")
     add_smoothed_col(db_df_copy, 'Steps', 3)
@@ -229,6 +233,7 @@ def add_smoothed_cols(db_connection, db_df):
     add_smoothed_col(db_df_copy, 'Calories', 5)
     add_smoothed_col(db_df_copy, 'Calories', 7)
 
-    pd.io.sql.to_sql(db_df_copy, 'fitness', db_connection, if_exists='replace')
+    with engine.connect() as conn, conn.begin():
+        db_df_copy.to_sql('fitness', conn, if_exists='replace')
 
     return db_df_copy
