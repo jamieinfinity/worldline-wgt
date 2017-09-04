@@ -54,7 +54,7 @@ def persist_fitbit_refresh_token(token_dict, cfg_file):
     parser.set('fitbit', 'access_token', token_dict['access_token'])
     parser.set('fitbit', 'refresh_token', token_dict['refresh_token'])
     parser.set('fitbit', 'expires_at', "{:.6f}".format(token_dict['expires_at']))
-    with open(cfg_file, 'wb') as configfile:
+    with open(cfg_file, 'w') as configfile:
         parser.write(configfile)
 
 
