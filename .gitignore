@@ -14,6 +14,7 @@ _Data
 *.env
 _libs
 *_apptoken
+*.png
 
 # Coverage tools
 lib-cov
