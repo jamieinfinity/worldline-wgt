@@ -38200,7 +38200,7 @@ function buildApp(domElementID) {
                 'measurementLabel': 'Steps',
                 'measurementTimespan': 1,
                 'measurementMinimum': 5000,
-                'measurementMaximum': 25000
+                'measurementMaximum': 20000
             },
             'data': stepsData,
             'trendData': stepsTrendData
@@ -38211,7 +38211,7 @@ function buildApp(domElementID) {
                 'measurementLabel': 'Calories',
                 'measurementTimespan': 1,
                 'measurementMinimum': 1500,
-                'measurementMaximum': 3500
+                'measurementMaximum': 3000
             },
             'data': caloriesData,
             'trendData': caloriesTrendData
@@ -38222,7 +38222,7 @@ function buildApp(domElementID) {
                 'measurementLabel': 'Weight',
                 'measurementTimespan': 1,
                 'measurementMinimum': 160,
-                'measurementMaximum': 185,
+                'measurementMaximum': 180,
             },
             'data': weightData,
             'trendData': weightTrendData
