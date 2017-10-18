@@ -3,6 +3,7 @@ import datetime
 import pandas as pd
 import numpy as np
 import random
+from sklearn.model_selection import KFold
 from keras.layers import Input
 from keras.layers import Dense
 from keras.layers import Dropout
@@ -20,34 +21,34 @@ db_name = 'worldline'
 db_ext = '.db'
 db_file_name = db_dir + db_name + db_ext
 
-_engine = create_engine('sqlite:///'+db_file_name)
+_engine = create_engine('sqlite:///' + db_file_name)
 
 with _engine.connect() as conn, conn.begin():
     _db_df = pd.read_sql_table('fitness', conn, index_col='Date', parse_dates=['Date'])
 
 
 def weight_transform(w):
-    return (w - 150.)/50.
+    return (w - 150.) / 50.
 
 
 def steps_transform(s):
-    return s/40000.
+    return s / 40000.
 
 
 def calories_transform(c):
-    return (c-500.)/4000.
+    return (c - 500.) / 4000.
 
 
 def weight_inverse_transform(w):
-    return w*50+150.
+    return w * 50 + 150.
 
 
 def steps_inverse_transform(s):
-    return s*40000.
+    return s * 40000.
 
 
 def calories_inverse_transform(c):
-    return c*4000. + 500.
+    return c * 4000. + 500.
 
 
 def reshape_sequences_target_sequence(model_data_df, sequence_length, shuffle=False):
@@ -104,9 +105,8 @@ def get_model_data_splits(sequence_length=10, holdout_days=60, test_days=60, tra
     return [train_val, test, holdout]
 
 
-
 def build_lstm_layer(lstm_size, dropout_rate, previous_layer):
-    layer_lstm = LSTM(lstm_size, return_sequences=True)(previous_layer)
+    layer_lstm = LSTM(lstm_size, activation='relu', return_sequences=True)(previous_layer)
     layer_dropout = Dropout(dropout_rate)(layer_lstm)
     return layer_dropout
 
@@ -122,7 +122,7 @@ def build_lstm_layers(lstm_sizes, dropout_rates, previous_layer):
 def build_lstm_model(model_params):
     _layer_input = Input(shape=(model_params['sequence_length'], model_params['num_features']))
     _layer_lstm_final = build_lstm_layers(model_params['lstm_sizes'], model_params['lstm_dropout_rates'], _layer_input)
-    _layer_output = TimeDistributed(Dense(1))(_layer_lstm_final)
+    _layer_output = TimeDistributed(Dense(1, activation='linear'))(_layer_lstm_final)
     model = Model(inputs=[_layer_input], outputs=[_layer_output])
     return model
 
@@ -131,10 +131,66 @@ def train_model(model_params, training_params, data):
     [(X_train, y_train), (X_val, y_val)] = data
     model = build_lstm_model(model_params)
     model.compile(loss=training_params['loss_function'], optimizer=training_params['optimization_method'])
-    early_stopping = EarlyStopping(monitor='val_loss', patience=training_params['early_stopping_patience'], min_delta=training_params['min_delta'])
+    early_stopping = EarlyStopping(monitor='val_loss', patience=training_params['early_stopping_patience'],
+                                   min_delta=training_params['min_delta'])
 
-    model.fit(X_train, y_train, validation_data=(X_val, y_val),
-              batch_size=training_params['batch_size'],
-              epochs=training_params['epochs'], verbose=training_params['verboseness'], callbacks=[early_stopping])
-    return model
+    hist = model.fit(X_train, y_train, validation_data=(X_val, y_val),
+                     batch_size=training_params['batch_size'],
+                     epochs=training_params['epochs'], verbose=training_params['verboseness'],
+                     callbacks=[early_stopping])
 
+    return model, hist
+
+
+def train_cv_models(model_params, training_params, data, n_splits=5, random_state=42, early_stopping_data=None):
+    [(features_train, target_train), (features_test, target_test)] = data
+    kfold = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)
+    models = []
+    histories = []
+    losses = []
+    cv_indices = []
+    fold = 0
+    for train_index, val_index in kfold.split(features_train):
+        print('Fold %d ' % fold)
+        cv_indices.append((train_index, val_index))
+        X_train, X_val = features_train[train_index], features_train[val_index]
+        y_train, y_val = target_train[train_index], target_train[val_index]
+        X_early_stop, y_early_stop = X_val, y_val
+        if early_stopping_data != None:
+            X_early_stop, y_early_stop = early_stopping_data
+        (model, hist) = train_model(model_params, training_params, [(X_train, y_train), (X_early_stop, y_early_stop)])
+        loss_train = model.evaluate(X_train, y_train, verbose=0)
+        loss_val = model.evaluate(X_val, y_val, verbose=0)
+        loss_test = model.evaluate(features_test, target_test, verbose=0)
+        print("losses - train: %f, val: %f, test: %f" % (loss_train, loss_val, loss_test))
+        losses.append({'train':loss_train, 'val':loss_val, 'test':loss_test})
+        models.append(model)
+        histories.append(hist)
+        fold+=1
+    return {'models': models, 'histories':histories, 'losses':losses, 'cv_indices':cv_indices}
+
+
+def train_bs_models(model_params, training_params, data, n_samples=5, sample_size=None):
+    [(features_train, target_train), (features_test, target_test)] = data
+    train_indices_full = np.array(list(range(features_train.shape[0])))
+    bs_size = sample_size
+    if bs_size == None:
+        bs_size = features_train.shape[0]
+    models = []
+    histories = []
+    losses = []
+    bs_indices = []
+    for sample_index in range(n_samples):
+        print('Sample %d ' % sample_index)
+        train_index = np.random.choice(train_indices_full, size=bs_size, replace=True)
+        X_train = features_train[train_index]
+        y_train = target_train[train_index]
+        (model, hist) = train_model(model_params, training_params, [(X_train, y_train), (features_test, target_test)])
+        loss_train = model.evaluate(X_train, y_train, verbose=0)
+        loss_test = model.evaluate(features_test, target_test, verbose=0)
+        print("losses - train: %f, test: %f" % (loss_train, loss_test))
+        losses.append({'train':loss_train, 'test':loss_test})
+        bs_indices.append(train_index)
+        models.append(model)
+        histories.append(hist)
+    return {'models': models, 'histories':histories, 'losses':losses, 'bs_indices':bs_indices}
