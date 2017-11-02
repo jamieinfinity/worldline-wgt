@@ -28,27 +28,33 @@ with _engine.connect() as conn, conn.begin():
 
 
 def weight_transform(w):
-    return (w - 150.) / 50.
+    return w / 170.0
+#    return (w - 150.) / 50.
 
 
 def steps_transform(s):
-    return s / 40000.
+    return s / 12000.0
+#    return s / 40000.
 
 
 def calories_transform(c):
-    return (c - 500.) / 4000.
+    return c / 2000.0
+#    return (c - 500.) / 4000.
 
 
 def weight_inverse_transform(w):
-    return w * 50 + 150.
+    return w * 170.0
+#    return w * 50 + 150.
 
 
 def steps_inverse_transform(s):
-    return s * 40000.
+    return s * 12000.0
+#    return s * 40000.
 
 
 def calories_inverse_transform(c):
-    return c * 4000. + 500.
+    return c * 2000.0
+#    return c * 4000. + 500.
 
 
 def reshape_sequences_target_sequence(model_data_df, sequence_length, shuffle=False):
@@ -96,12 +102,17 @@ def get_model_data_splits(sequence_length=10, holdout_days=60, test_days=60, tra
     max_date_holdout.to_datetime
     max_date_holdout_str = max_date_holdout.date().isoformat()
     min_date_holdout = max_date_holdout - datetime.timedelta(days=holdout_days)
+    if holdout_days == 0:
+        min_date_holdout = max_date_holdout
     min_date_holdout_str = min_date_holdout.date().isoformat()
     min_date_test = min_date_holdout - datetime.timedelta(days=test_days)
     min_date_test_str = min_date_test.date().isoformat()
     train_val = get_model_data_seq(earliest_date, min_date_test_str, sequence_length, shuffle=train_shuffle)
     test = get_model_data_seq(min_date_test_str, min_date_holdout_str, sequence_length, shuffle=False)
-    holdout = get_model_data_seq(min_date_holdout_str, max_date_holdout_str, sequence_length, shuffle=False)
+    if holdout_days == 0:
+        holdout=(np.array([]), np.array([]), np.array([]))
+    else:
+        holdout = get_model_data_seq(min_date_holdout_str, max_date_holdout_str, sequence_length, shuffle=False)
     return [train_val, test, holdout]
 
 
