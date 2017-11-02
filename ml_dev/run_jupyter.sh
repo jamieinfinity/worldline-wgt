@@ -1,7 +1,7 @@
 #!/bin/bash
 # file: run_h2o.sh
 
-dockername=${USER}_H2O_JUPYTER
+dockername=${USER}_JUPYTER
 
 docker run -d -t  \
 --shm-size=1g \
@@ -17,7 +17,10 @@ docker run -d -t  \
 -p 8080:8080 \
 -p 8888:8888 \
 -w $HOME \
-opsh2oai/h2o-deepwater-cpu:latest
+continuumio/anaconda3:latest
+
+#docker exec ${dockername} bash -c \
+#'pip3 install --user keras'
 
 #docker exec ${dockername} bash -c \
 #'pip3 install --user hyperopt'
