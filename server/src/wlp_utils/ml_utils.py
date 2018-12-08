@@ -13,7 +13,7 @@ from keras.models import Model
 from keras.callbacks import EarlyStopping
 
 earliest_date = '2015-09-16'
-server_dir = '/Users/jamieinfinity/Projects/WorldLine/worldline-wgt/server/'
+server_dir = '/Users/jamieinfinity/Dropbox/Projects/WorldLine/worldline-wgt/server/'
 cfg_file = server_dir + 'config/api_params.cfg'
 db_dir = server_dir + 'db/'
 backups_dir = db_dir + 'backups/'

@@ -70,7 +70,7 @@ function buildApp(domElementID) {
             'trendData': weightTrendData
         });
 
-        makeCalendar('#divCalendar', 800, [2013, 2017], dateSpan => {
+        makeCalendar('#divCalendar', 800, [2013, 2019], dateSpan => {
             resetTimelineSpan(dateSpan);
         });
 

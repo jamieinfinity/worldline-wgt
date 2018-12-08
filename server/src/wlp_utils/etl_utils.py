@@ -87,6 +87,14 @@ def refresh_steps(cfg_file, engine, db_df):
     return updated_df
 
 
+def get_mfp_calories(day_entry):
+    if not day_entry:
+        return None
+    if 'calories' in day_entry.totals:
+        return day_entry.totals['calories']
+    return None
+
+
 def refresh_calories(engine, db_df):
     print("REFRESHING CALORIES...")
     [date_start, date_end] = get_target_date_endpoints('Calories', db_df)
@@ -102,7 +110,7 @@ def refresh_calories(engine, db_df):
         diary_dump.append(diary_data)
         date_query = date_query + datetime.timedelta(days=1)
 
-    date_values = [[pd.tseries.offsets.to_datetime(x.date.strftime('%Y-%m-%d')), x.totals['calories']] for x in
+    date_values = [[pd.tseries.offsets.to_datetime(x.date.strftime('%Y-%m-%d')), get_mfp_calories(x)] for x in
                    diary_dump]
 
     updated_df = insert_values(date_values, 'Calories', db_df)

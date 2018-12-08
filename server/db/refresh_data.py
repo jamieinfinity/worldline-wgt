@@ -1,6 +1,6 @@
 #!/Users/jamieinfinity/anaconda/bin/python3
 import sys
-toolpath = '/Users/jamieinfinity/Projects/WorldLine/worldline-wgt/server/src'
+toolpath = '/Users/jamieinfinity/Dropbox/Projects/WorldLine/worldline-wgt/server/src'
 sys.path.append(toolpath)
 import wlp_utils.etl_utils as etl
 import os
@@ -9,7 +9,7 @@ from sqlalchemy import create_engine
 import pandas as pd
 
 
-server_dir = '/Users/jamieinfinity/Projects/WorldLine/worldline-wgt/server/'
+server_dir = '/Users/jamieinfinity/Dropbox/Projects/WorldLine/worldline-wgt/server/'
 cfg_file = server_dir + 'config/api_params.cfg'
 db_dir = server_dir + 'db/'
 backups_dir = db_dir + 'backups/'
@@ -33,7 +33,7 @@ updated_df = etl.impute_missing_weights(engine, updated_df)
 updated_df = etl.add_smoothed_cols(engine, updated_df)
 
 
-client_dir = '/Users/jamieinfinity/Projects/WorldLine/worldline-wgt/client/'
+client_dir = '/Users/jamieinfinity/Dropbox/Projects/WorldLine/worldline-wgt/client/'
 app_data_file = client_dir + 'app/fitness_data.csv'
 updated_df.to_csv(app_data_file)
 
