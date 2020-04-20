@@ -44,7 +44,7 @@ def get_target_date_range(column, df):
 def insert_values(date_values, column, df):
     df_updated = pd.DataFrame(df, copy=True)
     for dv in date_values:
-        df_updated.set_value(dv[0], column, dv[1])
+        df_updated.at[dv[0], column]=dv[1]
     return df_updated
 
 
@@ -77,7 +77,7 @@ def refresh_steps(cfg_file, engine, db_df):
 
     [date_start, date_end] = get_target_date_endpoints('Steps', db_df)
     steps = auth_client.time_series('activities/steps', base_date=date_start, end_date=date_end)
-    date_values = [[pd.tseries.offsets.to_datetime(val['dateTime']), val['value']] for val in steps['activities-steps']]
+    date_values = [[pd.to_datetime(val['dateTime']), val['value']] for val in steps['activities-steps']]
     updated_df = insert_values(date_values, 'Steps', db_df)
     updated_df[['Steps']] = updated_df[['Steps']].apply(pd.to_numeric)
 
@@ -110,7 +110,7 @@ def refresh_calories(engine, db_df):
         diary_dump.append(diary_data)
         date_query = date_query + datetime.timedelta(days=1)
 
-    date_values = [[pd.tseries.offsets.to_datetime(x.date.strftime('%Y-%m-%d')), get_mfp_calories(x)] for x in
+    date_values = [[pd.to_datetime(x.date.strftime('%Y-%m-%d')), get_mfp_calories(x)] for x in
                    diary_dump]
 
     updated_df = insert_values(date_values, 'Calories', db_df)

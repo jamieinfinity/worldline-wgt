@@ -1,4 +1,4 @@
-#!/Users/jamieinfinity/anaconda/bin/python3
+#!/Users/jamieinfinity/opt/anaconda3/bin/python
 import sys
 toolpath = '/Users/jamieinfinity/Dropbox/Projects/WorldLine/worldline-wgt/server/src'
 sys.path.append(toolpath)
@@ -27,13 +27,13 @@ if os.path.isfile(db_file_name):
     etl.copy_file(db_file_name, backup_file_name)
 
 updated_df = etl.refresh_steps(cfg_file, engine, db_df)
-updated_df = etl.refresh_weight(cfg_file, engine, updated_df)
+# updated_df = etl.refresh_weight(cfg_file, engine, updated_df)
 updated_df = etl.refresh_calories(engine, updated_df)
-updated_df = etl.impute_missing_weights(engine, updated_df)
-updated_df = etl.add_smoothed_cols(engine, updated_df)
+# updated_df = etl.impute_missing_weights(engine, updated_df)
+# updated_df = etl.add_smoothed_cols(engine, updated_df)
 
 
-client_dir = '/Users/jamieinfinity/Dropbox/Projects/WorldLine/worldline-wgt/client/'
-app_data_file = client_dir + 'app/fitness_data.csv'
-updated_df.to_csv(app_data_file)
+# client_dir = '/Users/jamieinfinity/Dropbox/Projects/WorldLine/worldline-wgt/client/'
+# app_data_file = client_dir + 'app/fitness_data.csv'
+# updated_df.to_csv(app_data_file)
 
